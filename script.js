@@ -65,7 +65,7 @@ const displayList = document.getElementById('recordsDisplay');
 
 loadBtn.addEventListener('click', async () => {
     try {
-        const response = await fetch('http://localhost:5000/api/records');
+        const response = await fetch('https://athens-f67r.onrender.com');
         const data = await response.json();
 
         displayList.innerHTML = ""; // Clear the list first
@@ -97,7 +97,7 @@ deleteDataBtn.addEventListener('click', async () => {
     
     if (confirmDelete) {
         try {
-            const response = await fetch('http://localhost:5000/api/clear-all', {
+            const response = await fetch('https://athens-f67r.onrender.com', {
                 method: 'DELETE'
             });
             const result = await response.json();
