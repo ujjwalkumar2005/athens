@@ -41,6 +41,7 @@ attendanceForm.addEventListener('submit', async (e) => {
             },
             body: JSON.stringify(attendanceData)
         });
+  }
 
         const result = await response.json();
 
