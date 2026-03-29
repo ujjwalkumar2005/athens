@@ -31,6 +31,7 @@ attendanceForm.addEventListener('submit', async (e) => {
 
     try {
         // 2. Send the data to Render
+       // 2. Send the data to your Node.js backend
         const response = await fetch('https://athens-f67r.onrender.com/api/mark', {
             method: 'POST',
             headers: {
