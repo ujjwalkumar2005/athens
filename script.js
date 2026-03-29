@@ -1,4 +1,4 @@
-let heading = document.querySelector('h1')
+let heading = document.querySelector('h1');
 
 function getRandomRGB() {
     const r = Math.floor(Math.random() * 256);
@@ -7,33 +7,30 @@ function getRandomRGB() {
     return `rgb(${r}, ${g}, ${b})`;
 }
 
-
-
 heading.addEventListener('mouseenter', () => {
-    heading.style.color = getRandomRGB()
-})
-
+    heading.style.color = getRandomRGB();
+});
 
 if (window.history.replaceState) {
     window.history.replaceState(null, null, window.location.href);
 }
 
-
 const attendanceForm = document.getElementById('attend');
 
 attendanceForm.addEventListener('submit', async (e) => {
-    e.preventDefault(); // This stops the page from refreshing
+    e.preventDefault();
 
-    // 1. Collect data from your HTML inputs
+    // 1. Collect data (Check that these IDs match your HTML exactly!)
     const attendanceData = {
         studentName: document.getElementById('studentName').value,
         rollNumber: document.getElementById('rollNumber').value,
         status: document.getElementById('attendanceStatus').value,
-        date: new Date().toLocaleDateString() // Adds today's date automatically
+        // Using ISO format (YYYY-MM-DD) is safer for MongoDB than toLocaleDateString
+        date: new Date().toISOString().split('T')[0] 
     };
 
-  try {
-        // 2. Send the data to your Node.js backend
+    try {
+        // 2. Send the data to Render
         const response = await fetch('https://athens-f67r.onrender.com/api/mark', {
             method: 'POST',
             headers: {
@@ -41,25 +38,22 @@ attendanceForm.addEventListener('submit', async (e) => {
             },
             body: JSON.stringify(attendanceData)
         });
-  
 
         const result = await response.json();
 
-        // 3. Handle the response from the server
         if (response.ok) {
             alert("Success: " + result.message);
-            attendanceForm.reset(); // Clears the form for the next student
+            attendanceForm.reset();
         } else {
-            alert("Error: " + result.error);
+            // This will now tell you exactly WHICH field MongoDB didn't like
+            alert("Server Error: " + (result.error || "Unknown error"));
         }
 
     } catch (error) {
         console.error("Connection failed:", error);
-        alert("Server is not running. Please start your backend first!");
+        alert("Cannot connect to server. Check if Render is awake!");
     }
 });
-
-
 
 const loadBtn = document.getElementById('loadRecords');
 const displayList = document.getElementById('recordsDisplay');
@@ -69,32 +63,27 @@ loadBtn.addEventListener('click', async () => {
         const response = await fetch('https://athens-f67r.onrender.com/api/records');
         const data = await response.json();
 
-        displayList.innerHTML = ""; // Clear the list first
+        displayList.innerHTML = ""; 
 
         data.forEach(record => {
             const li = document.createElement('li');
-            li.textContent = `${record.studentName} (Roll_no : ${record.rollNumber}) - ${record.status} on ${record.date}`;
+            li.textContent = `${record.studentName} (Roll: ${record.rollNumber}) - ${record.status} on ${record.date}`;
             displayList.appendChild(li);
         });
     } catch (error) {
         console.error("Error fetching data:", error);
+        alert("Failed to load records.");
     }
 });
 
-
 const clearBtn = document.getElementById('clearDisplay');
-
 clearBtn.addEventListener('click', () => {
-    // This just empties the <ul> or <div> on your screen
     document.getElementById('recordsDisplay').innerHTML = "";
-    console.log("Display cleared, but data is still in MongoDB.");
 });
 
-
 const deleteDataBtn = document.getElementById('deleteDatabase');
-
 deleteDataBtn.addEventListener('click', async () => {
-    const confirmDelete = confirm("Are you sure you want to delete ALL records from the database?");
+    const confirmDelete = confirm("Are you sure you want to delete ALL records from MongoDB?");
     
     if (confirmDelete) {
         try {
@@ -102,55 +91,35 @@ deleteDataBtn.addEventListener('click', async () => {
                 method: 'DELETE'
             });
             const result = await response.json();
-            
             alert(result.message);
-            // Also clear the screen after deleting from DB
             document.getElementById('recordsDisplay').innerHTML = ""; 
-            
         } catch (error) {
             console.error("Delete failed:", error);
         }
     }
 });
 
-
-
-
-
-
-
-
+// UI Transitions
 let form_cont = document.querySelector('.box');
-
 form_cont.addEventListener('click', () => {
-    // 1. Immediate feedback (The "Smooth" part starts)
     form_cont.style.cursor = 'wait'; 
-    
-    // 2. Start the fade-out animation
     document.querySelector('.box').classList.add('fade-away');
     document.querySelector('.box1').classList.add('fade-away');
 
-    // 3. The Delay
-    // I reduced this to 600ms for a "small and smooth" feel. 
-    // 3000ms (3 seconds) usually feels like the site has crashed!
     setTimeout(() => {
-        // Hide the old stuff
         document.querySelector('.box').hidden = true;
         document.querySelector('.box1').hidden = true;
 
-        // Show the form
         let form = document.querySelector('form');
         form.hidden = false;
 
-        let attendance = document.querySelector('#attendanceList')
+        let attendance = document.querySelector('#attendanceList');
         attendance.hidden = false;
         
-        // Optional: Fade the form IN
         form.style.opacity = '0';
         setTimeout(() => {
             form.style.transition = 'opacity 0.5s ease';
             form.style.opacity = '1';
         }, 10);
-
-    }, 600); // 600ms is the sweet spot for "smooth"
+    }, 600);
 });
